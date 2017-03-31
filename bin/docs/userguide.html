@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>
+CRL Help Guide
+</title>
+</head>
+<body>
+<div style="text-align: center">
+<h1><span>CRL Help Guide</span></h1>
+</div>
+<div>CRL is pronounced 'curl' and stands for Customer Record Locator.</div>
+<div>
+<div>For a quick overview you may read the <strong>Quick Pointers</strong> in each 
+section defined in the Table of Contents.</div>
+<div>
+<h2><strong>Table of Contents</strong></h2>
+</div>
+<ol>
+   <li><A HREF="#Properties">Property Editor Tool</A></li>
+	<li><A HREF="#Insert">Insert New Record</A></li>
+	<li><A HREF="#Search">Search for Records</A></li>
+	<li><A HREF="#Update and Delete">Update and Delete Records</A></li>
+	<li><A HREF="#Modes">Modes of Operation</A></li>
+	<li><A HREF="#Fields">Field Definitions</A></li>
+	<li><A HREF="#Options">Server Documentation & Start-up Options</A></li>
+</ol>
+<div>
+<A NAME="Insert">
+<h2><strong>Insert New Record</strong></h2>
+</A>
+</div>
+<p>The User Interface is divided up into 2 main tables.  A field entry table at the top used to insert new records 
+into the database or used to search for existing records matching criteria entered 
+into any of it's cells.  The field entry table is surrounded by a white border.  
+The display table at the bottom is used to display the results of a database 
+query or insert and perform row updates and deletes on existing records.  The display table 
+is surrounded by a black border.</p>
+<div style="text-align: center"><img src="images/1.1.jpg" width="1002" height="652" alt="" /></div>
+<p>
+<div style="text-align: center">Fig.1.1 The Entry Table is where you search for records or insert a new record.</div>
+<br />
+In Fig 1.1 shown above a user has entered all the fields shown in the entry table and hit the Insert button.  
+The new record is inserted into the database and displayed in the display table.  A unique record number is
+assigned automatically by the database and not the user.  New record inserts will ignore any record number
+entered by the user in the <code><A HREF="#Fields">Record #</code></A> field of the entry table.  Pressing 
+the Clear button will clear all fields in the entry table.
+</p>
+<ul><strong>Insert Quick Pointers</strong>
+<li>Record # cell is ignored on Insert.</li>
+<li>Only the Record # and Customer cells may be left blank when inserting (as shown above).</li>
+<li>When inserting a new record list the specialities in order with the greatest specialization
+first under the <code>Work</code> column. Multiple specialties are comma separated. The first value 
+in the <code>Work</code> column is considered the primary specialty.</li>
+</ul>
+<div>
+<A NAME="Search">
+<h2><strong>Search for Records</strong></h2>
+</A>
+</div>
+<p>The entry table may also be used to search for existing records.  Two types of searches are supported.  
+A record number may be entered in the <code>Record #</code> cell.  When the Search button is pressed the 
+record matching the record number entered will be returned and displayed in the display table.  Alternatively 
+text may be entered into any field and all records whose columns begin with the entered text will 
+be returned.  A record number will override any other entered search criteria so at most 1 record will 
+be returned if a record number is entered in the <code> Record #</code> cell.  Blanks are considered 
+wild-cards so partial strings may be entered in any of the column indexes of the entry table.  Columns in 
+the database that begin with those strings will be returned.  Entering no data at all will return all 
+records contained in the database.  Results from multiple searches append to the display table if the row does not 
+already exist.
+</p>
+<div style="text-align: center"><img src="images/1.3.jpg" width="1002" height="652" alt="" /></div>
+<p>
+<div style="text-align: center">Fig.1.2 The Entry Table showing a search for "Heating" under Work Performed.</div>
+<br />
+In Fig 1.2 shown above a user has entered the string "Heating" in the <code><A HREF="#Fields">Work</code></A> column. 
+All the rows whose Work column begins with "Heating" have been returned and displayed in the display table.
+</p>
+<ul><strong>Search Quick Pointers</strong>
+<li>Record # cell overrides all other criteria on Search.</li>
+<li>Pressing Search with no criteria will return all rows.</li>
+<li>Entering text will return rows matching text in corresponding column.</li>
+<li>Entering text in multiple cells will return rows matching text in each corresponding column.</li>
+<li>Matching is unlike grep in that database columns must begin with the entered text.</li>
+<li>Matching is not case sensitive.</li>
+</ul>
+<div>
+<A NAME="Update and Delete">
+<h2><strong>Update and Delete Records</strong></h2>
+</A>
+</div>
+<p>Modifications and deletions are performed in the display table.  Two checkboxes in the right-most
+columns are used to indicate which operation is being performed on a given row.  Check 'Update' to 
+modify cells for update.  Check 'Delete' to mark a row for deletion.  Rows marked for delete are 
+highlighted in red.  Cells that have been modified are highlighted in green if the data differs
+from the value in the database.  De-selecting 'Update' before committing will restore the 
+original values in the display table and no update action will occur for cells that have been 
+reverted.  Pressing 'Commit' will commit all changes to the underlying database.
+</p>
+<div style="text-align: center"><img src="images/1.4.png" width="1002" height="652" alt="" /></div>
+<p>
+<div style="text-align: center">Fig.1.3 The display table showing 3 cells that have been updated and 1 row 
+marked for deletion.</div>
+<br />
+In Fig 1.3 shown above the user has searched for all records where the primary work performed is 'Plumbing'. 
+The records are retrieved from the database and displayed in the display table.  The user has modified 3 fields.  
+The company location and size have been modified for record #3.  The company rate has been modified for
+record #26 and record #28 is selected for deletion.  When the user hits the 'Commit' button the changes
+will be persisted in the database, the search will be performed again, and the new results will be 
+displayed showing the changes.  Once the 'Commit' button has been pressed the changes can not 
+be reverted.
+</p>
+<ul><strong>Update and Delete Quick Pointers</strong>
+<li>Search must precede any update or delete.</li>
+<li>Only way to modify cells in the display table is to check 'Update'.</li>
+<li>Unchecking 'Update' will revert all uncommitted changes.</li>
+<li>Press 'Commit' to commit all changes.</li>
+<li>Press 'Clear' to clear the display table.</li>
+</ul>
+<div>
+<A NAME="Modes">
+<h2><strong>Modes of Operation</strong></h2>
+</A>
+</div>
+<p>Two types of run modes are supported.  Online (Network client mode) and Offline (Stand-alone mode).  
+Online mode is the normal 
+operation mode and signifies the database is running on a remote computer with several clients connected to it 
+via a network connection to a common database server.  
+Offline mode implies that the user is accessing a local database file on the users own P.C. or workstation.  
+Offline mode implies that each user running in Offline mode has their own private copy of the database 
+and they will not see each others changes.  
+<Strong> Sharing of a common database file across multiple users running in Offline mode or between 
+users running in Offline mode and users in Online mode is not 
+supported.  Care must be taken to ensure that users running in Offline mode can not access a shared database 
+file from a networked file system when choosing a file in Offline mode.</strong> Switching between modes of 
+operation will force a network connection to open or close depending on the selected run mode.</p>
+<div style="text-align: center"><img src="images/1.5.png" width="751" height="425" alt="" /></div>
+<p>
+<div style="text-align: center">Fig.1.4 Working offline and choosing a local database file.</div>
+<br />
+In Fig 1.4 shown above a user has chosen to work offline and is selecting a local database file from a pop-up file chooser.
+</p>
+<p>
+<div style="text-align: center"><img src="images/1.6.png" width="776" height="305" alt="" /></div>
+<div style="text-align: center">Fig.1.5 Selecting a remote file when working online (network client mode).</div>
+<br />
+In Fig 1.5 shown above a user is working online and is specifying a new remote database file.
+</p>
+<ul><strong>Run Mode Quick Pointers</strong>
+<li>Never choose a networked file when working in Offline mode.</li>
+</ul>
+<A NAME="Fields">
+<h2><strong>Field Definitions</strong></h2>
+</A>
+<ol>
+<li><strong>Record #</strong>: Numeric record number (no insertion or modification).</li>
+<li><strong>Name</strong>: 32 char alphanumeric subcontractor name.</li>
+<li><strong>City</strong>: 64 char alphanumeric location.</li>
+<li><strong>Work</strong>: 64 char alphanumeric types of work performed (specialties).</li>
+<li><strong>Size</strong>: 6 char numeric staff size.</li>
+<li><strong>Rate</strong>: 8 char numeric hourly rate. '$' must be first.  Decimal point '.' allowed.</li>
+<li><strong>Customer</strong>: 8 char numeric customer who has booked this contractor.</li>
+</ol>
+<div>
+<A NAME="Properties">
+<h2><strong>Property Editor Tool (PET)</strong></h2>
+</A>
+</div>
+<p>System Administrative Users may add, update, or delete system properties using the Property Editor Tool (PET).
+ PET can not be launched from CRL.  To launch PET execute the following command from the directory containing runme.jar: 
+ <div style="font-family: courier, fixed, monospace; font-size: large; text-align: center; ">java -cp runme.jar 
+suncertify.props.PropConfigLauncher</div></p>
+<div style="text-align: center"><img src="images/1.7.png" width="802" height="454" alt="" /></div>
+<p>
+<div style="text-align: center">Fig.1.6 The Property Editor Tool (PET) after pressing 'Load'.</div>
+<br />
+In Fig 1.6 shown above an Admin user has pressed the 'Load' button to display the system properties.  The tool 
+is modeled after CRL and is used in exactly the same way.  Please read through the CRL documentation for an overview of 
+the layout and how to select properties for modification and deletion prior to committing the changes.  
+The three main functions are circled in red. Loading properties and committing changes is done from the display table as 
+is done in CRL.  Inserting new properties is done from the entry table surrounded by a white border in the upper half of 
+the user interface.
+</p>
+<ul><strong>Property Editor Quick Pointers</strong>
+<li>Load properties from the property file by pressing 'Load'.</li>
+<li>Insert new properties from the upper half of the GUI (entry table) then press 'Insert'.</li>
+<li>Select properties for edit or delete using the checkboxes.</li>
+<li>Commit changes to the properties file by pressing 'Commit'</li>
+</ul>
+<div>
+<div>
+<A NAME="Options">
+<h2><strong>Server Documentation & Start-up Options</strong></h2>
+</A>
+</div>
+<p>The two modes of operation are described above. See <A HREF="#Modes">Modes of Operation.</A>
+Offline mode is performed entirely inside 1 single JVM instance.  Online mode requires two JVM instances.  
+The commands to start the JMVs in these modes are shown below:
+</p>
+<ul><strong>To run CRL in ONLINE Mode (Client & Server)</strong>
+<li>On the network server host from the directory which includes the jar file run: <strong>java -jar runme.jar server</strong></li>
+<li>On the network client host from the directory which includes the jar file run: <strong>java -jar runme.jar</strong></li>
+</ul>
+<ul><strong>To run CRL in OFFLINE Mode (Stand-alone)</strong>
+<li>On the client host from the directory which includes the jar file run: <strong>java -jar runme.jar alone</strong></li>
+</ul>
+<p>System properties are stored in the same directory as runme.jar in a file called 
+suncertify.properties and contain the following property names and descriptions.</p>
+<ul>
+<li><strong>rmi.registry.port:</strong>  The port that the network and client programs communicate on.</li>
+<li><strong>rmi.registry.host:</strong>  The host name that the network server runs on.</li>
+<li><strong>db.file:</strong>  The location of the database file on the network server host in ONLINE mode or 
+the location of the file on the client host when running in OFFLINE mode.</li>
+</ul>
+<p>Manual editing of suncertify.properties is strongly discouraged.  System properties may be added, modified, 
+or deleted using the <A HREF="#Properties">Property Editor Tool</A>.
+<div>
+</body>
+</html>

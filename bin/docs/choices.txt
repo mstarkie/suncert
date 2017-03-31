@@ -1,0 +1,63 @@
+﻿Michael C. Starkie - choices.txt
+--------------------------------
+
+The following describes the significant design choices, judgments, problems, issues and decisions I faced while building this project.
+
+Section 1:  RMI vs. Object Serialization
+----------------------------------------
+
+I chose to use RMI because it allowed me to rapidly build a proto-type of the tool by freeing me of having to develop my own socket communication classes and the ability it offers to execute server functions much like RPC with simple method call syntax.  This turned out to be advantageous because it freed up significant time to focus on the client interface.  RMI allowed me to learn more about its limitations and gave me insights into problems that must be addressed to scale the application for a much wider audience when scaling for the web.  Since the objective of the project was a learning exercise I felt this approach was totally justified.
+
+One of the limitations of RMI is the lack of ability to limit the number of threads on the server side by confining them to a thread pool.  Since a new thread is spawned for each client request, RMI would not be suitable for a large number of web-based requests.
+
+Using RMI first in the proto-type allowed me to flush out the remote interface very rapidly.  The implementation of the RMI remote interface may be re-used for object serialization by simply building a set of serializable pub/sub operation classes on top of it that act upon it.  The serializable classes would only need to encapsulate the method arguments and the server could invoke the methods in the current implementation by mapping those methods to the name of the serialized class encapsulating the operation.  For example, a SearchRecordsOp class could be serialized to invoke the searchRecords() method in DataAccessImpl.  This method is already being used outside of any RMI context in stand-alone mode so this would work in an object serialization model as well.  This would work for serialization over plain client/server sockets or in web based applications that take advantage of JSPs. 
+
+Section 2:  Use of synchronous block/wait.
+-----------------------------------------
+
+Even though client requests are transferred from the AWT event framework to a new thread in the client GUI before invoking remote methods, the new threads must wait for the server to respond.  The GUI is freed up for user interaction but a better solution would have been to break the remote interface (DataAccess) into two interfaces namely a Publisher interface and a Subscriber interface.  The publisher thread on the client side would submit an operation to the remote server and terminate.  When the operation finished on the server side, the remote server would publish the results back to the client.  Moving to an asynchronous model (client/server on both sides) would be needed for large scale production use especially if other features will be supported that do not return all data at one time.  A feature which asks to be notified of all newly locked records going forward would need an asynchronous return.
+ 
+Section 3:  Use of hard coded field widths and field names.
+----------------------------------------------------------
+
+The project uses a class called DBField which is an enum that hard codes the database file field lengths.  The table model also makes use of static column names.  The hard coded widths are used to set column restrictions on the JTable.  The hard coded names are used statically in the table models.  A better solution would have been to make these available from the remote DataAccess interface and convert the DBField enum into a standard class based upon values read from the database file.  This will now need to be reverse engineered out of the prototype before going to the web because the table schema may change after undergoing the rigors of production use.  No code changes would be needed if these lengths have to change in the schema when read dynamically.  Since this information is already contained in the database file it should have been done like this from the start.  However I did realize from this experience that the data types should also be included in the schema for a truly dynamic model construct.  This is because of columns like ‘OWNER’ which are described as being numeric in the documentation but left out of the schema information in the database file.  If this information were included in the schema, the client GUI could use it to build a data input validation system from the information contained in the database file alone.
+
+Section 4:  Database Record Locking.
+-----------------------------------
+
+** IMPORTANT NOTE:  In the essay exam I mentioned that I kept track of the number of threads waiting on a lock and then removed all references to the lock when no thread was interested in it.  I have since removed this feature as further analysis showed it to be too inefficient for the final submission. It will need to be rethought before going to production.  ***
+
+Record locking is achieved without any synchronized methods.  Synchronization is performed by synchronizing on an object representing a record number and its associated cookie (see DBLock.java) and a little help from the concurrency package.  Record locking is used behind the scenes in createRecord as well as searchCriteria to prevent data corruption from write operations while reads are in progress.  One drawback to my approach is that record locks are persisted into a map (see DBRecordLocker.java) and never removed.  In the worst case the table will grow to the size of the number of records.  Before scaling the application to the web, stale locks (i.e., locks with no threads waiting for the monitor) should be removed from the table.  To implement this successfully a count of the number of threads waiting for the lock needs to be maintained.  Also, the operations of incrementing or decrementing this counter must be made atomic with obtaining and freeing references to locks.  I could not think of a way to achieve this without synchronizing some methods in the DBRecordLocker.java class.  This would have resulted in two monitors having to be obtained (one for the lock and another for the table) when locking and unlocking records.  A goal of mine was to have only 1 monitor on an object representing a record.  Unless and until I can think of a way to reconcile this with lock cleanups I have left it out.
+
+Section 5:  Remote File Specification.
+-------------------------------------
+
+The requirements mention that the user must be able to specify the location of the database file and that the interface must accept an indication that a local database is to be used.  It wasn’t clear from the documentation if user specification of this file was only for stand alone mode so I implemented both.  For stand-alone mode a full file chooser is used but in online mode the remote server is queried via RMI for the URI of the file and returned as a string.  The user must know the location of a new remote db file before modifying this value because implementing a remote file chooser seemed beyond the scope of the requirement.  I don't think that this is a good feature.  Changing the location of the remote file forces a re-initialization of the network server and this will affect all network clients.  Only admin users should be able to modify the remote file location on behalf of users and it should be done using an admin tool (see PET).  Since the word 'must' was used in the requirements it was implemented.  Also, users of the feature must be familiar with URI syntax in its current form.
+
+Section 6:  Odds & Ends.
+-----------------------
+
+AbstractTableModel was extended instead of using DefaultTableModel.  This is mainly due to the rich set of features in the GUI.  Mainly the ability of a user to revert JTable updates to the values of the database and to select multiple rows for update and delete before committing the changes.
+
+RMI Remote Interface (RI) differs from DBAccess interface.  At first I tried to keep the RI consistent with DBAccess but abandoned this idea early.  The features of the user interface ended up defining the RI and not the database access methods.
+
+Separate table models for DisplayTableModel and SearchCriteriaTableModel.  Since the two tables are stacked in the GUI and very similar one might ask why the DisplayTableModel does not inherit from the SearchCriteriaTableModel.  This should be refactored as such before the production release.
+
+A JTable was used to handle search and insert requests because it seemed to me to be the most consistent and logical device to use for these purposes.  It also allowed me to use the same device to insert and search for records.
+
+Data type and width checking is performed in all cells of both the SearchCriteriaTableModel and the DisplayTableModel.  This prevents the corruption of data in the underlying database and trains users in regards to the appropriate data limitations.  For example, a user can not enter alphabetic characters in the OWNER column of either the DisplayTableModel or SearchCriteriaTableModel.
+
+Inserting a new record forces a select on the returned record number.  When a user enters a new record she sees it in the display table only if the record exists in the database.
+
+Users may switch back and forth between stand-alone and client run modes from the client GUI as many times as desired without having to restart the server.
+
+In order to include a ‘$’ in the Rate column and still have it sort like a floating point a special Rate class was created.  See suncertify.model.Rate
+
+Values entered into the Owner column can only be numeric and sort like integers yet null values are permitted.  See suncertify.model.DisplayTableModel#setValueAt(Object aValue, int rowIndex, int columnIndex) and suncertify.view.IntegerLimit
+
+A progress bar (or similar) would have been an appropriate addition considering the limitations of synchronous block/wait and will need to be added when moving to an asynchronous model as described in section #2.
+
+Record locking is not fair in the current implementation.  It could be made fair by adding a blocking queue to the DBRecordLocker.  Instead of mapping a record number to a DBLock the locker could map a record number to a blocking queue of DBLocks.  Instead of using wait() in lock() a call to the get() method on the queue associated with a record would be used and likewise, a call to the queue’s put() method would replace the notifyAll() in the unlock() method.  See suncertify.db.DBRecordLocker.
+
+The property editor tool (PET) uses almost the same technology as the Customer Record Locator (CRL).  This provides a consistent look and feel to the application as a whole.
+
